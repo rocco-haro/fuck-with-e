@@ -1,0 +1,146 @@
+{% load static %}
+{% load extras %}
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+	<meta charset="utf-8" />
+	<meta
+	  name="viewport"
+	  content="width=device-width, initial-scale=0.9, shrink-to-fit=no"
+	/>
+
+	<link
+	  href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500&display=swap"
+	  rel="stylesheet"
+	/>
+	<link
+	  href="https://fonts.googleapis.com/css?family=Material+Icons|Material+Icons+Outlined|Material+Icons+Two+Tone|Material+Icons+Round|Material+Icons+Sharp"
+	  rel="stylesheet"
+	/>
+
+	<link rel="stylesheet" type="text/css" href="{% static 'style.css' %}">
+
+	<link rel="stylesheet" type="text/css" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+
+	<title>Chat</title>
+  </head>
+  <body>
+  	{% if messages %}
+		{% for message in messages %}
+			{% ifequal message.tags "error" %}
+				<div class="alert alert-danger alert-dismissible fade show" role="alert">
+			{% else %}
+				<div class="alert alert-success alert-dismissible fade show" role="alert">
+			{% endifequal %}
+		 		{{message}}
+			 		<button type="button" class="close" data-dismiss="alert" aria-label="Close">
+						<span aria-hidden="true">&times;</span>
+					</button>
+				</div>
+		{% endfor %}
+	{% endif %}
+
+	<div class="wrapper">
+	  <div class="sidebar shadow">
+		<nav class="sidebar-nav">
+			<a
+				type="button"
+				class="btn btn-light current"
+				data-toggle="tooltip"
+				data-placement="right"
+				title="Authenticate"
+				href="{% url 'login' %}"
+			>
+				<i class="material-icons-outlined text-dark">login</i>
+			</a>
+
+			<a
+				type="button"
+				class="btn btn-light"
+				data-toggle="tooltip"
+				data-placement="right"
+				title="Live Chat"
+			>
+				<i class="material-icons-outlined">comment</i>
+			</a>
+
+			<a
+				type="button"
+				class="btn btn-light"
+				data-toggle="tooltip"
+				data-placement="right"
+				title="Admin"
+			>
+            	<i class="material-icons-outlined">support_agent</i>
+          	</a>
+		</nav>
+	  </div>
+
+	  <div class="topbar">
+
+		<div class="topbar-title">
+		  <h1>Authenticate</h1>
+		</div>
+
+	  </div>
+
+	  <div class="block-wrapper">
+		<div class="container-fluid container-max">
+		  <div class="row">
+			<div class="col-12 col-sm-12 col-md-12 col-lg-4 col-xl">
+			  <div class="block shadow-sm">
+
+				<div class="col-6 align-self-center mt-5">
+					<form action="{% url 'login' %}" method="POST">
+						{% csrf_token %}
+					  <div class="form-group">
+					    <label>Account sid</label>
+					    <input type="text" class="form-control" name="account_sid">
+					  </div>
+					  <div class="form-group">
+					    <label>Auth token</label>
+					    <input type="text" class="form-control" name="auth_token">
+					  </div>
+
+					  <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#exampleModalCenter">
+					  Submit
+					</button>
+
+				<div class="block-body" id="chat_container">
+					<div class="modal fade" id="exampleModalCenter" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+					  <div class="modal-dialog modal-dialog-centered" role="document">
+					    <div class="modal-content">
+					      <div class="modal-header border-0">
+					        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+					          <span aria-hidden="true">&times;</span>
+					        </button>
+					      </div>
+					      <div class="modal-body align-self-center">
+					        <a>Save the data for easy authentication</a>
+					      </div>
+					      <div class="modal-footer border-0">
+					        <button type="submit" class="btn btn-secondary" name="cancel">Cancel</button>
+					        <button type="submit" class="btn btn-primary" name="save">Save</button>
+					      </div>
+					    </div>
+					  </div>
+					</div>
+				</div>
+
+				</form>
+	
+				</div>
+			  </div>
+			</div>
+		  </div>
+		</div>
+	  </div>
+	</div>
+	
+	<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+	<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
+</body>
+
+</html>

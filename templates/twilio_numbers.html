@@ -1,0 +1,321 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8" />
+		<meta
+			name="viewport"
+			content="width=device-width, initial-scale=0.9, shrink-to-fit=no"
+		/>
+		<link
+			href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500&display=swap"
+			rel="stylesheet"
+		/>
+		<link
+			href="https://fonts.googleapis.com/css?family=Material+Icons|Material+Icons+Outlined|Material+Icons+Two+Tone|Material+Icons+Round|Material+Icons+Sharp"
+			rel="stylesheet"
+		/>
+		<link rel="stylesheet" type="text/css" href="{% static 'style.css' %}">
+		<title>Admin</title>
+	</head>
+	<body>
+		{% if messages %}
+			{% for message in messages %}
+				{% ifequal message.tags "error" %}
+					<div class="alert alert-danger alert-dismissible fade show" role="alert">
+				{% else %}
+					<div class="alert alert-success alert-dismissible fade show" role="alert">
+				{% endifequal %}
+			 		{{message}}
+				 		<button type="button" class="close" data-dismiss="alert" aria-label="Close">
+							<span aria-hidden="true">&times;</span>
+						</button>
+					</div>
+			{% endfor %}
+		{% endif %}
+
+		<div class="wrapper">
+			<div class="sidebar shadow">
+				<nav class="sidebar-nav">
+					<a
+						type="button"
+						class="btn btn-light"
+						data-toggle="tooltip"
+						data-placement="right"
+						title="Authenticate"
+					>
+						<i class="material-icons-outlined">login</i>
+					</a>
+
+					<a
+						type="button"
+						class="btn btn-light"
+						data-toggle="tooltip"
+						data-placement="right"
+						title="Live Chat"
+						href="{% url 'index' %}"
+					>
+						<i class="material-icons-outlined text-dark">comment</i>
+					</a>
+					
+					<a
+						type="button"
+						class="btn btn-light current"
+						data-toggle="tooltip"
+						data-placement="right"
+						title="Admin"
+						href="{% url 'twilioNumbers' %}"
+					>
+						<i class="material-icons">admin_panel_settings</i>
+					</a>
+				</nav>
+			</div>
+
+			<div class="topbar">
+				<div class="topbar-logo">
+					<a href="./admin-dashboard.html">
+						<img src="./images/Logo.svg" alt="Logo" />
+					</a>
+				</div>
+				<div class="topbar-title">
+					<h1>Twilio Numbers</h1>
+				</div>
+				<div class="topbar-time">
+					<span id="clock"></span>
+				</div>
+				<div class="topbar-info">
+
+					<div class="dropdown">
+						<button
+							type="button"
+							class="btn info-profile"
+							id="profileStatusMenu"
+							data-toggle="dropdown"
+							aria-haspopup="true"
+							aria-expanded="false"
+						>
+							<i class="material-icons">admin_panel_settings</i>
+							<i class="material-icons status-active">fiber_manual_record</i>
+						</button>
+					</div>
+					<p class="topbar-info-wrap">Admin</p>
+					<a href="{% url 'logout' %}" class="btn btn-light border-dark">
+						Logout
+					</a>
+				</div>
+			</div>
+
+			<div class="block-wrapper">
+				<div class="container-fluid container-max">
+					<div class="row">
+
+
+
+						{% if available_phone_numbers %}
+							<div class="col-12 col-sm-12 d-flex justify-content-around">
+							<div class="block shadow-sm col-3 bg-light">
+						{% else %}
+							<div class="col-12 col-sm-12 d-flex justify-content-center">
+							<div class="block shadow-sm col-9">
+						{% endif %}
+								<div class="block-header border-bottom">
+									<div class="row justify-content-between">
+									
+										<div class="col">
+											<div class="row justify-content-center align-items-center">
+												<div class="col d-flex justify-content-between">
+													<a></a>
+													<h3 class="text-muted">Account Numbers</h3>
+													<button
+														type="button"
+														class="btn btn-primary icon-btn"
+														data-toggle="modal"
+														data-target="#addNewAgent"
+													>
+														<i class="material-icons">add</i>
+													</button>
+													
+												</div>
+
+												
+											</div>
+										</div>
+									</div>
+								</div>
+								<div class="table-responsive block-table">
+									<table class="table">
+										<thead>
+											<tr>
+												{% if available_phone_numbers %}
+													<th class="table-action bg-light"></th>
+													<th class="bg-light">Phone Number</th>
+												{% else %}
+													<th class="table-action"></th>
+													<th>Phone Number</th>
+													<th>Date created</th>
+													<th>Date updated</th>
+													<th>Voice</th>
+													<th>SMS</th>
+													<th>MMS</th>
+												{% endif %}
+											</tr>
+										</thead>
+										<tbody>
+											{% for number in numbers %}
+												<tr>
+													
+													{% if available_phone_numbers %}
+														<td>
+															<a class="btn info-profile bg-lg disabled"
+															> <i class="material-icons">support_agent</i>
+															</a>
+														</td>
+														<td><a class="btn btn-lg disabled">{{number.phone_number}}</a></td>
+													{% else %}
+														<td>
+															<a class="btn info-profile"
+															> <i class="material-icons">support_agent</i>
+															</a>
+														</td>
+														<td>{{number.phone_number}}</td>
+														<td>{{number.date_created}}</td>
+														<td>{{number.date_updated}}</td>
+														<td>{{number.capabilities.voice}}</td>
+														<td>{{number.capabilities.sms}}</td>
+														<td>{{number.capabilities.mms}}</td>
+													{% endif %}
+												</tr>
+											{% endfor %}
+										</tbody>
+									</table>
+								</div>
+							</div>
+
+						{% if available_phone_numbers %}
+							<div class="block shadow-sm col-8">
+								<div class="block-header border-bottom">
+									<div class="row justify-content-between">
+										<div class="col">
+											<div class="row justify-content-center align-items-center">
+												<div class="col d-flex justify-content-center">
+													<h3 class="text-muted">Available Numbers</h3>
+												</div>
+											</div>
+										</div>
+									</div>
+								</div>
+								<div class="table-responsive block-table">
+									<table class="table table-hover">
+										<thead>
+											<tr>
+												<th class="table-action"></th>
+												<th>Phone Number</th>
+												<th>Region</th>
+												<th>Locality</th>
+												<th>Voice</th>
+												<th>SMS</th>
+												<th>MMS</th>
+											</tr>
+										</thead>
+										<tbody>
+											{% for number in available_phone_numbers %}
+												<tr data-href="{% url 'buy_twilio_number' number.phone_number %}" role="button">
+													<td class="table-action">
+														<a
+															role="button"
+															href="#"
+															class="btn info-profile"
+														> 
+														<i class="material-icons">support_agent</i>
+														</a>
+													</td>
+													<td>{{number.phone_number}}</td>
+													<td>{{number.region}}</td>
+													<td>{{number.locality}}</td>
+													<td>{{number.capabilities.voice}}</td>
+													<td>{{number.capabilities.SMS}}</td>
+													<td>{{number.capabilities.MMS}}</td>
+												</tr>
+											{% endfor %}
+										</tbody>
+									</table>
+								</div>
+							</div>
+						{% endif %}
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<div
+			class="modal fade"
+			id="addNewAgent"
+			data-backdrop="static"
+			data-keyboard="false"
+			tabindex="-1"
+			role="dialog"
+			aria-labelledby="transferDiscussionLabel"
+			aria-hidden="true"
+		>
+			<div class="modal-dialog modal-dialog-scrollable">
+				<div class="modal-content">
+					<div class="modal-header">
+						<h5 class="modal-title" id="transferDiscussionLabel">
+							Add Twilio Number
+						</h5>
+						<button
+							type="button"
+							class="close"
+							data-dismiss="modal"
+							aria-label="Close"
+						>
+							<icon class="material-icons">close</icon>
+						</button>
+					</div>
+
+					<div class="modal-body">
+
+						<div class="modal-body-inner">
+							<form action="{% url 'twilioNumbers' %}" method="POST">
+								{% csrf_token %}
+								<div class="row">
+									<div class="col-12 col-sm-12">
+											<label>Country</label>
+											<select class="ml-5" id="countries" name="countries">
+												{% for country in countries %}
+													<option value={{country.1}}>{{country.0}}</option>
+												{% endfor %}
+											</select>
+									</div>
+								 </div>
+								 <div class='mt-5'>
+									<button type="submit" class="btn btn-primary">Create</button>
+									<button
+										type="button"
+										class="btn btn-default-white"
+										data-dismiss="modal"
+									>Cancel</button>
+								</div>
+
+							</form>
+						</div>
+					</div>
+
+
+				</div>
+			</div>
+		</div>
+
+	<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+	<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+	<script type="text/javascript">
+		jQuery(document).ready(function($) {
+		    $('*[data-href]').on('click', function() {
+		        window.location = $(this).data("href");
+		    });
+		});
+	</script>
+	</body>
+</html>

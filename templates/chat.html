@@ -1,0 +1,909 @@
+{% load static %}
+{% load extras %}
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+	<!-- Required meta tags -->
+	<meta charset="utf-8" />
+	<meta
+	  name="viewport"
+	  content="width=device-width, initial-scale=0.9, shrink-to-fit=no"
+	/>
+
+	<!-- Font -->
+	<link
+	  href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500&display=swap"
+	  rel="stylesheet"
+	/>
+	<link
+	  href="https://fonts.googleapis.com/css?family=Material+Icons|Material+Icons+Outlined|Material+Icons+Two+Tone|Material+Icons+Round|Material+Icons+Sharp"
+	  rel="stylesheet"
+	/>
+
+	<!-- Template CSS -->
+	<!-- <a>dddddddddd</a> -->
+	<!-- <link rel="stylesheet" href="./style.css" /> -->
+	<link rel="stylesheet" type="text/css" href="{% static 'style.css' %}">
+
+	<!-- <link rel="stylesheet" type="text/css" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css"> -->
+
+	<title>Chat</title>
+  </head>
+  <body>
+
+
+
+  	{% if messages %}
+		{% for message in messages %}
+			{% ifequal message.tags "error" %}
+				<!-- <div class="alert alert-danger" role="alert"> -->
+				<div class="alert alert-danger alert-dismissible fade show" role="alert">
+			{% else %}
+				<!-- <div class="alert alert-success" role="alert"> -->
+				<div class="alert alert-success alert-dismissible fade show" role="alert">
+			{% endifequal %}
+		 		{{message}}
+			 		<button type="button" class="close" data-dismiss="alert" aria-label="Close">
+						<span aria-hidden="true">&times;</span>
+					</button>
+				</div>
+			<!-- </div> -->
+		{% endfor %}
+	{% endif %}
+	<!-- Wrapper Start  -->
+
+	<div class="wrapper">
+	  <!-- Sidebar Start  -->
+
+	  <div class="sidebar shadow">
+
+		<nav class="sidebar-nav">
+			<a
+				type="button"
+				class="btn btn-light"
+				data-toggle="tooltip"
+				data-placement="right"
+				title="Authenticate"
+			>
+				<i class="material-icons-outlined">login</i>
+			</a>
+		  <a
+			type="button"
+			class="btn btn-light current"
+			data-toggle="tooltip"
+			data-placement="right"
+			title="Live Chat"
+			href="{% url 'index' %}"
+		  >
+			<i class="material-icons-outlined text-dark">comment</i>
+		  </a>
+		  
+		  <a
+			type="button"
+			class="btn btn-light"
+			data-toggle="tooltip"
+			data-placement="right"
+			title="Admin"
+			href="{% url 'twilioNumbers' %}"
+		  >
+			<!-- <i class="material-icons-outlined text-dark">support_agent</i> -->
+			<i class="material-icons">admin_panel_settings</i>
+		  </a>
+		</nav>
+	  </div>
+
+	  <!-- Sidebar End  -->
+	  <!-- Topbar Start -->
+
+	  <div class="topbar">
+
+		<div class="topbar-title">
+		  <h1>Chat</h1>
+		</div>
+
+		<div class="topbar-time">
+		  <!-- <span id="clock">Show Time</span> -->
+		  <span id="clock"></span>
+		</div>
+
+		<script type="text/javascript">
+			function press_start(){
+				
+				currentTime(3);
+			}
+
+			function currentTime(x) {
+
+				if(x>=0){
+					var sec = x;
+					document.getElementById("clock").innerText = sec; /* adding time to the div */
+					var t = setTimeout(currentTime, 1000, x-1); /* setting timer */
+				}else{
+					document.getElementById("clock").innerText = "";
+				}
+				return;
+
+			}
+
+
+		</script>
+
+
+		<div class="topbar-info">
+		  <!-- Profile Info Start -->
+
+		  <!-- <div class="dropdown"> -->
+			<button
+			  type="button"
+			  class="btn info-profile"
+			  id="profileStatusMenu"
+			  data-toggle="dropdown"
+			  aria-haspopup="true"
+			  aria-expanded="false"
+			>
+			  <i class="material-icons">face</i>
+			  <i class="material-icons status-active">fiber_manual_record</i>
+			</button>
+
+		  <!-- </div> -->
+		  <!-- <p class="topbar-info-wrap">Nick Fury</p> -->
+		  	{% ifequal twilio_number None %}
+		  		<p class="topbar-info-wrap">- - -</p>
+		  	{% else %}
+		  		<p class="topbar-info-wrap">{{twilio_number}}</p>
+		  	{% endifequal %}
+			
+			<a href="{% url 'logout' %}" class="btn btn-light border-dark">
+				Logout
+			</a>
+
+		  <!-- Actions End -->
+		</div>
+	  </div>
+
+	  <!-- Topbar End -->
+	  <!-- Body Start -->
+
+	  <div class="block-wrapper">
+		<div class="container-fluid container-max">
+		  <div class="row">
+
+
+
+
+
+
+
+
+		  	<div class="col-12 col-sm-12  col-md-12  col-lg-4 col-xl-3">
+			{% ifequal target_number None %}
+			<div class="block shadow-sm bg-light">
+					<button
+						id="add_btn"
+						name="add_btn"
+						type="button"
+						class="btn btn-secondary icon-btn align-self-end position-absolute rounded-0"
+						data-toggle="modal"
+						data-target="#addTargetNumber"
+					>
+						<i class="material-icons">add</i>
+					</button>
+				<div class="block-header align-self-center">
+					<h4 class="text-muted">Twilio numbers</h4>
+			{% else %}
+			<div class="block shadow-sm">
+					<button
+						id="add_btn"
+						name="add_btn"
+						type="button"
+						class="btn btn-secondary icon-btn align-self-end position-absolute rounded-0"
+						data-toggle="modal"
+						data-target="#addTargetNumber"
+					>
+						<i class="material-icons text-light">add</i>
+					</button>
+
+				<div class="block-header align-self-center">
+					<h4>Target numbers</h4>
+			{% endifequal %}
+
+					<!-- <button
+						type="button"
+						class="btn btn-primary icon-btn"
+						data-toggle="modal"
+						data-target="#addNewAgent"
+					>
+						<i class="material-icons">add</i>
+					</button> -->
+
+				</div>
+
+				<div class="block-body no-padding">
+				  <div class="list-group">
+
+
+					{% for number in all_messages %}
+							{% ifequal number target_number %}
+								<a href="{% url 'index' number twilio_number %}" class="list-group-item list-group-item-action active" value={{number}}>
+								<div class="display no-padding">
+									<div class="display-header mr-3">
+									  <button type="button" class="btn info-profile">
+										<i class="material-icons">face</i>
+										<!-- <i class="material-icons status-active">fiber_manual_record</i> -->
+									  </button>
+									</div>
+									<div class="display-body">
+									  <div class="row h-100">
+										<div class="col row align-items-center">
+										  <h6>{{number}}</h6>
+										</div>
+										<!-- <div class="col-auto"> -->
+										  <!-- <span class="number-batch">5</span> -->
+										<!-- </div> -->
+									  </div>
+									</div>
+								  </div>
+							{% else %}
+								<a href="{% url 'index' number twilio_number %}" class="list-group-item list-group-item-action" value={{number}}>
+								<div class="display no-padding">
+									<div class="display-header mr-3">
+									  <button type="button" class="btn info-profile">
+										<i class="material-icons">face</i>
+										<!-- <i class="material-icons status-inactive">fiber_manual_record</i> -->
+									  </button>
+									</div>
+									<div class="display-body">
+									  <div class="row h-100">
+										<div class="col row align-items-center">
+										  <h6>{{number}}</h6>
+										</div>
+										<!-- <div class="col-auto">
+										  <span class="number-batch">5</span>
+										</div> -->
+									  </div>
+									</div>
+								  </div>
+							{% endifequal %}
+
+						</a>
+					{% endfor %}
+
+
+
+				  </div>
+				</div>
+				
+			  </div>
+			</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+			<div
+			class="modal fade"
+			id="addTargetNumber"
+			name="addTargetNumber"
+			data-backdrop="static"
+			data-keyboard="false"
+			tabindex="-1"
+			role="dialog"
+			aria-labelledby="transferDiscussionLabel"
+			aria-hidden="true"
+		>
+			<div class="modal-dialog modal-dialog-scrollable">
+				<div class="modal-content">
+					<div class="modal-header">
+						<h5 class="modal-title" id="transferDiscussionLabel">
+							Add Twilio Number
+						</h5>
+						<button
+							type="button"
+							class="close"
+							data-dismiss="modal"
+							aria-label="Close"
+						>
+							<icon class="material-icons">close</icon>
+						</button>
+					</div>
+
+
+					<div class="modal-body">
+
+						<!-- <script type="text/javascript">
+							$('#addTargetNumber').on('shown.bs.modal', function () {
+							    // $('#new_target_number').focus();
+							    alert("one");
+							})
+						</script> -->
+
+						<div class="modal-body-inner">
+							<form action="" method="POST">
+								{% csrf_token %}
+								<div class="row">
+									<div class="col-12 col-sm-12">
+										<!-- <div class="form-group table-filter-from"> -->
+											<label>Phone Number</label>
+											<input class="ml-5" type="text" name="new_target_number" id="new_target_number" required="">
+									</div>
+
+								 </div>
+								 <div class='mt-5'>
+									<button type="submit" name="new_target_number_btn" class="btn btn-primary">OK</button>
+									<button
+										type="button"
+										class="btn btn-default-white"
+										data-dismiss="modal"
+									>Cancel</button>
+								</div>
+
+							</form>
+						</div>
+					</div>
+
+
+				</div>
+			</div>
+		</div>
+
+
+
+
+
+
+
+
+			<!-- User List Start -->
+
+			<!-- <div class="col-12 col-sm-12 col-md-12 col-lg-4 col-xl-3">
+			  <div class="block shadow-sm">
+
+				<div class="block-header border-bottom">
+				  <input
+					class="form-control"
+					type="text"
+					placeholder="Search..."
+					required
+				  />
+				</div>
+
+				<div class="block-body no-padding">
+				  <div class="list-group">
+
+
+
+					<a href="#" class="list-group-item list-group-item-action active">
+					  <div class="display no-padding">
+						<div class="display-header">
+						  <button type="button" class="btn info-profile">
+							<i class="material-icons">face</i>
+							<i class="material-icons status-active"
+							  >fiber_manual_record</i
+							>
+						  </button>
+						</div>
+						<div class="display-body">
+						  <div class="row">
+							<div class="col">
+							  <h6>Peter Parker</h6>
+							  <p><span>ESITEST</span></p>
+							</div>
+							<div class="col-auto">
+							  <span class="number-batch">5</span>
+							</div>
+						  </div>
+						  <div class="display-footer">
+							<p><small>10sec ago</small></p>
+						  </div>
+						</div>
+					  </div>
+					</a>
+
+
+
+					<a href="#" class="list-group-item list-group-item-action">
+					  <div class="display no-padding">
+						<div class="display-header">
+						  <button type="button" class="btn info-profile">
+							<i class="material-icons">face</i>
+							<i class="material-icons status-active"
+							  >fiber_manual_record</i
+							>
+						  </button>
+						</div>
+						<div class="display-body">
+						  <div class="row">
+							<div class="col">
+							  <h6>Bruce Banner</h6>
+							  <p><span>ESITEST</span></p>
+							</div>
+							<div class="col-auto">
+							  <span class="number-batch">5</span>
+							</div>
+						  </div>
+						  <div class="display-footer">
+							<p><small>5min ago</small></p>
+						  </div>
+						</div>
+					  </div>
+					</a>
+
+
+
+					<a href="#" class="list-group-item list-group-item-action">
+					  <div class="display no-padding">
+						<div class="display-header">
+						  <button type="button" class="btn info-profile">
+							<i class="material-icons">face</i>
+							<i class="material-icons status-inactive"
+							  >fiber_manual_record</i
+							>
+						  </button>
+						</div>
+						<div class="display-body">
+						  <div class="row">
+							<div class="col">
+							  <h6>Steve Roger</h6>
+							  <p><span>ESITEST</span></p>
+							</div>
+							<div class="col-auto">
+							  <span class="number-batch">3</span>
+							</div>
+						  </div>
+						  <div class="display-footer">
+							<p><small>8min ago</small></p>
+						  </div>
+						</div>
+					  </div>
+					</a>
+
+
+
+					<a href="#" class="list-group-item list-group-item-action list-group-item-warning">
+					  <div class="display no-padding">
+						<div class="display-header">
+						  <button type="button" class="btn info-profile">
+							<i class="material-icons">face</i>
+							<i class="material-icons status-away"
+							  >fiber_manual_record</i
+							>
+						  </button>
+						</div>
+						<div class="display-body">
+						  <div class="row">
+							<div class="col">
+							  <h6>Clinton Francis Barton</h6>
+							  <p><span>ESITEST</span></p>
+							</div>
+							<div class="col-auto">
+							  <span class="number-batch">+9</span>
+							</div>
+						  </div>
+						  <div class="display-footer">
+							<p><small>10min ago</small></p>
+						  </div>
+						</div>
+					  </div>
+					</a>
+
+
+
+				  </div>
+				</div>
+
+			  </div>
+			</div>
+
+
+
+
+
+ -->
+
+			<!-- User List End -->
+
+			<!-- Chat Box Start -->
+			<div class="col-12 col-sm-12 col-md-12 col-lg-4 col-xl">
+			{% ifequal target_number None %}
+				<div class="block shadow-sm bg-light">
+					<div class="block-header border-bottom">
+					  <div class="display no-padding">
+						
+						<div class="display-body ml-5">
+						  <div class="row h-100">
+							<div class="col row align-items-center">
+							  <h3 class="text-muted">- - -</h3>
+							</div>
+						  </div>
+						</div>
+
+					  </div>
+					</div>
+			{% else %}
+				<div class="block shadow-sm">
+					<div class="block-header border-bottom">
+					  <div class="display no-padding">
+						
+						<div class="display-header mr-4">
+						  <button type="button" class="btn info-profile">
+							<i class="material-icons">face</i>
+						  </button>
+						</div>
+
+						<div class="display-body">
+						  <div class="row h-100">
+							<div class="col row align-items-center">
+							  <h3>Chat with {{target_number}}</h3>
+							</div>
+						  </div>
+						</div>
+
+					  </div>
+					</div>
+			{% endifequal %}
+
+			  <!-- <div class="block shadow-sm bg-light"> -->
+			  <!-- <div class="block shadow-sm"> -->
+
+
+
+				<div class="block-body" id="chat_container">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+				  <!-- Conversation Start -->
+
+
+				{% for message in target_messages %}
+
+					{% ifequal message|get:"from_number" twilio_number %}
+						<div class="chat-block-right">
+							<div class="chat-message">
+							  <p class="m-0">
+								{{message|get:"message"}}
+							  </p>
+							</div>
+							<small>
+								{{message|get:"transmission_time_stamp"}}
+
+								
+								{% if message|get:"status" == "delivered" %}
+									<i class="material-icons text-primary h5">done_all</i>
+								{% elif message|get:"status" == "loading" %}
+									<i class="material-icons text-light h5">fiber_manual_record</i>
+								{% else %}
+									<i class="material-icons text-danger h5">warning</i>
+								{% endif %}
+								<!-- <i class="material-icons text-danger h6">error</i> -->
+								<!-- <i class="material-icons text-danger h5">warning</i> -->
+								<!-- <i class="material-icons text-primary h5">done_all</i> -->
+							</small>
+						</div>
+					{% else %}
+						<div class="chat-block-left">
+							<div class="chat-message">
+							  <p class="m-0">
+								{{message|get:"message"}}
+							  </p>
+							</div>
+							<small>
+								{{message|get:"transmission_time_stamp"}}
+
+								
+								<!-- {{message|get:"status"}} -->
+								<!-- <i class="material-icons text-danger h6">error</i> -->
+								<!-- <i class="material-icons text-danger h5">warning</i> -->
+								<!-- <i class="material-icons text-primary h5">done_all</i> -->
+							</small>
+						</div>
+					{% endifequal %}
+
+
+				{% endfor %}
+
+
+
+
+
+				  <!-- Conversation End -->
+
+
+
+				</div>
+
+				<!-- <div class="block-footer"> -->
+				<!-- <div class="block-footer" style="border-top: 2px solid grey; padding: 0px;"> -->
+					<div class="block-footer" style="padding: 0px;">
+				<!-- <div class="block-footer border-top"> -->
+				<!-- <div class="block-footer border-5"> -->
+				  <div class="block-section" style="padding: 0px;">
+					<form class="" method="POST">
+						{% csrf_token %}
+
+						{% ifequal target_number None %}
+						<textarea disabled="" 
+						  class="form-control mb-2"
+						  id="chatArea"
+						  name="chatArea"
+						  rows="3"
+						  placeholder="Message"
+						  autofocus
+						  required
+						  style="border: 2px solid grey;"
+						></textarea>
+
+						<div class="d-flex flex-row justify-content-between align-items-center">
+						  <button type="submit" class="btn btn-primary icon-btn-text" disabled="">
+							SEND 
+							<i class="material-icons">send</i>
+						  </button>
+						</div>
+						{% else %}
+						<textarea
+						  class="form-control mb-2"
+						  id="chatArea"
+						  name="chatArea"
+						  rows="3"
+						  placeholder="Message"
+						  autofocus
+						  required
+						  style="border: 2px solid grey;"
+						></textarea>
+
+						<div class="d-flex flex-row justify-content-between align-items-center">
+						  <button type="submit" class="btn btn-primary icon-btn-text" name="text_area_btn" onclick="press_start();">
+						  <!-- <button type="submit" class="btn btn-primary icon-btn-text" name="text_area_btn" onclick="presss();"> -->
+							SEND 
+							<i class="material-icons">send</i>
+						  </button>
+						</div>
+						{% endifequal %}
+						
+					</form>
+				  </div>
+				</div>
+
+
+
+			  </div>
+			</div>
+
+
+			<!-- <script type="text/javascript">
+				function presss(){
+					alert("oneee");
+				}
+
+			</script> -->
+			<!-- Chat Box End -->
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+			<div class="col-12 col-sm-12  col-md-12  col-lg-4 col-xl-3">
+			{% ifequal twilio_number None %}
+			<div class="block shadow-sm bg-light">
+				<div class="block-header align-self-center">
+					<h4 class="text-muted">Twilio numbers</h4>
+			{% else %}
+			<div class="block shadow-sm">
+				<div class="block-header align-self-center">
+					<h4>Twilio numbers</h4>
+			{% endifequal %}
+
+				</div>
+
+				<div class="block-body no-padding">
+				  <div class="list-group">
+
+
+					{% for number in twilio_numbers %}
+						<!-- <a href="{% url 'index' '2222' number %}" class="list-group-item list-group-item-action" value={{number}}> -->
+							{% ifequal number twilio_number %}
+								<a href="{% url 'index' target_number number %}" class="list-group-item list-group-item-action active" value={{number}}>
+								<div class="display no-padding">
+									<div class="display-header mr-3">
+									  <button type="button" class="btn info-profile">
+										<i class="material-icons">face</i>
+										<i class="material-icons status-active">fiber_manual_record</i>
+									  </button>
+									</div>
+									<div class="display-body">
+									  <div class="row h-100">
+										<div class="col row align-items-center">
+										  <h6>{{number}}</h6>
+										</div>
+										<!-- <div class="col-auto"> -->
+										  <!-- <span class="number-batch">5</span> -->
+										<!-- </div> -->
+									  </div>
+									</div>
+								  </div>
+							{% else %}
+								<a href="{% url 'index' target_number number %}" class="list-group-item list-group-item-action" value={{number}}>
+								<div class="display no-padding">
+									<div class="display-header mr-3">
+									  <button type="button" class="btn info-profile">
+										<i class="material-icons">face</i>
+										<i class="material-icons status-inactive">fiber_manual_record</i>
+									  </button>
+									</div>
+									<div class="display-body">
+									  <div class="row h-100">
+										<div class="col row align-items-center">
+										  <h6>{{number}}</h6>
+										</div>
+										<div class="col-auto">
+										  <span class="number-batch">5</span>
+										</div>
+									  </div>
+									</div>
+								  </div>
+							{% endifequal %}
+
+						  <!-- <div class="display no-padding">
+							<div class="display-header mr-3">
+							  <button type="button" class="btn info-profile">
+								<i class="material-icons">face</i>
+								<i class="material-icons status-active">fiber_manual_record</i>
+							  </button>
+							</div>
+							<div class="display-body">
+							  <div class="row h-100">
+								<div class="col row align-items-center">
+								  <h6>{{number}}</h6>
+								</div>
+								<div class="col-auto">
+								  <span class="number-batch">5</span>
+								</div>
+							  </div>
+							</div>
+						  </div> -->
+
+
+						</a>
+					{% endfor %}
+
+
+
+				  </div>
+				</div>
+				
+			  </div>
+			</div>
+
+
+
+
+
+
+
+
+
+		  </div>
+		</div>
+	  </div>
+
+	  <!-- Body End -->
+	</div>
+
+	<!-- Wrapper End  -->
+	
+	<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+	<!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/2.5.3/cjs/popper.min.js"></script> -->
+
+	<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+	<!-- <script src="{% static 'index.js' %}"></script> -->
+	<!-- <script>
+	  var pageHeight = $("#chat_container").height();
+	  // $("#chat_container").scrollTop(pageHeight+Number.MAX_SAFE_INTEGER);
+	  // alert(pageHeight*2)
+	  // 9007199254740991
+	  // $("#chat_container").scrollTop(907819999999999);
+	  // $("#chat_container").scrollTop(907889000000000);
+	  $("#chat_container").scrollTop(pageHeight*2);
+	</script> -->
+	<script>
+		$("#chat_container").scrollTop($("#chat_container")[0].scrollHeight);
+	</script>
+
+
+
+	<script type="text/javascript">
+
+		// $(document).on('shown', "#addTargetNumber", function() {
+		$(document).on('click', "#add_btn", function() {
+		    // $('[autofocus]', this).focus();
+		    // alert("one");
+		    setTimeout(function(){
+		    	$('#new_target_number').focus();
+		    }, 500);
+		    // $('#new_target_number').focus();
+		});
+		    // <!-- // $('#new_target_number').focus(); -->
+		    // alert("one");
+		// })
+	</script>
+	
+</body>
+
+</html>
